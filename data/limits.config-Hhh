@@ -1,8 +1,8 @@
 [inputs]
 
 em = Imperial
-et = Imperial
-mt = Imperial
+et = Italians
+mt = Italians
 mm = DESY-KIT
 ee = DESY-KIT
 tt = Italians
@@ -252,9 +252,12 @@ mt_categories_8TeV = 00,01,02,03,04
 tt_categories_8TeV = 00,01,02,03,04
 
 em_processes = Fakes,EWK,ttbar,Ztt
-et_processes = TT,QCD,ZTT,W,ZL,ZJ,VV
-mt_processes = TT,QCD,ZTT,W,ZL,ZJ,VV
-tt_processes = ZTT,TT,QCD,W,ZL,ZJ,VV
+# et_processes = TT,QCD,ZTT,W,ZL,ZJ,VV
+# mt_processes = TT,QCD,ZTT,W,ZL,ZJ,VV
+# tt_processes = ZTT,TT,QCD,W,ZL,ZJ,VV
+et_processes = TT,QCD,ZTT,W,VV # temporarily disabled ZL, ZJ
+mt_processes = TT,QCD,ZTT,W,VV # temporarily disabled ZL, ZJ
+tt_processes = ZTT,TT,QCD,W,VV # temporarily disabled ZL, ZJ
 
 
 
