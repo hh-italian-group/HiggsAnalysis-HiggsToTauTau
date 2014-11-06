@@ -227,9 +227,9 @@ blind
 periods = 8TeV
 channels = et mt tt
 
-et_categories_8TeV = 0 1 2 3 4
-mt_categories_8TeV = 0 1 2 3 4
-tt_categories_8TeV = 0 1 2 3 4
+et_categories_8TeV = 0 1 2
+mt_categories_8TeV = 0 1 2
+tt_categories_8TeV = 0 1 2
 
 
 et_names_8TeV = 2jet0tag 2jet1tag 2jet2tag
@@ -243,9 +243,9 @@ et_threshold = 0.05
 mt_threshold = 0.05
 tt_threshold = 0.05
 
-et_categories_8TeV = 00,01,02,03,04
-mt_categories_8TeV = 00,01,02,03,04
-tt_categories_8TeV = 00,01,02,03,04
+et_categories_8TeV = 00,01,02
+mt_categories_8TeV = 00,01,02
+tt_categories_8TeV = 00,01,02
 
 et_processes = TT,QCD,ZTT,W,ZL,ZJ,VV
 mt_processes = TT,QCD,ZTT,W,ZL,ZJ,VV
