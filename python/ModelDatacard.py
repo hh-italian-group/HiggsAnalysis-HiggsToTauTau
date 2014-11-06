@@ -18,7 +18,7 @@ class ModelDatacard(DatacardAdaptor) :
     counting experiments. For counting experiments no differences in acceptance due to differing masses of the contributing
     Higgses are taken into account, as these can not be a priori known from a single datacard. 
     """
-    def __init__(self, parser_options, model_label, update_file=False) :
+    def __init__(self, parser_options, model_label, mA, update_file=False, ana_type='') :
         ## postfix label for the root input file where to find the rates modified according to the given model
         self.model_label = model_label
         ## write the the new template histogram with new histogram name into the same file (i.e. update the existing file)
@@ -29,6 +29,10 @@ class ModelDatacard(DatacardAdaptor) :
         ## memory of the root input files that have been processed by ModelTemplates during the lifetime of the instantiated
         ## class object
         self.already_processed_template_files = []
+        ## analyses type (for Htt its empty, only for Hplus its 'Hplus'
+        self.ana_type=ana_type
+        ## mass of A
+        self.mA = mA
         ## initialize base class
         super(ModelDatacard, self).__init__()
 
@@ -151,7 +155,7 @@ class ModelDatacard(DatacardAdaptor) :
                 ## shifts. For mu these shifts are added linearly for each higgs (MOMENT=1). For pdf they are added in quad-
                 ## rature (MOMENT=2). In the datacards the absolute shifts are divided by the central value (added linearly)
                 ## to transform them into relative shifts. The difference in adding the uncertainties leads to a slightly
-                ## different treatment, in the transformation of abs->rel difference, esp for the -shift.  
+                ## different treatment, in the transformation of abs->rel difference, esp for the -shift.
                 value = model.central[key].effective()
                 lower = params[0].effective(1 if type == 'mu' else 2)
                 upper = params[1].effective(1 if type == 'mu' else 2)
@@ -161,26 +165,39 @@ class ModelDatacard(DatacardAdaptor) :
                         continue
                     if not (period in bin or '*' in bin) :
                         continue
-                    for proc_in_card in card.list_of_signals() :
-                        if proc_in_card == proc :
-                            ## first fill whole list with placeholders then replace with uncertainty numbers at right places
-                            if len(uncerts)==0 :
-                                for idx in range(len(index_order)) :
-                                    uncerts.append('-')
+                    if self.ana_type=="Hplus" :
+                        label = 'signal_'+decay+'_'+type+'_'+period
+                        if len(uncerts)==0 :
                             for idx in range(len(index_order)) :
-                                if idx == index_order.index(bin+'_'+proc) :
-                                    if type == 'mu' :
-                                        if  value>0 and lower/value!=1 :
-                                            uncerts[idx]=" \t\t %.3f/%.3f " % (1./(1.-lower/value), 1.+upper/value)
-                                        else :
-                                            uncerts[idx]=" \t\t 0.1 "
-                                    if type == 'pdf' :
-                                        if value>0 :
-                                            uncerts[idx]=" \t\t %.3f/%.3f " % (1./(1.+lower/value), 1.+upper/value)
-                                        else :
-                                            uncerts[idx]=" \t\t 0.1 "
+                                uncerts.append('-')
+                            for idx in range(len(index_order)) :
+                                for proc_in_card in card.list_of_signals() :
+                                    if idx == index_order.index(bin+'_'+proc_in_card) :
+                                        uncerts[idx]=" \t\t %.3f " % (1.21 if params[0].masses['Hp'] < 165 else 1.32)
+                    else :
+                        for proc_in_card in card.list_of_signals() :
+                            if proc_in_card == proc :
+                                ## first fill whole list with placeholders then replace with uncertainty numbers at right places
+                                if len(uncerts)==0 :
+                                    for idx in range(len(index_order)) :
+                                        uncerts.append('-')
+                                for idx in range(len(index_order)) :
+                                    if idx == index_order.index(bin+'_'+proc) :
+                                        if type == 'mu' :
+                                            if  value>0 and lower/value!=1 :
+                                                uncerts[idx]=" \t\t %.3f/%.3f " % (1./(1.-lower/value), 1.+upper/value)
+                                            else :
+                                                uncerts[idx]=" \t\t 0.1 "
+                                        if type == 'pdf' :
+                                            if value>0 :
+                                                uncerts[idx]=" \t\t %.3f/%.3f " % (1./(1.+lower/value), 1.+upper/value)
+                                            else :
+                                                uncerts[idx]=" \t\t 0.1 "
                 ## in case label is not yet in dict, add uncerts as they are. Otherwise update '-' entries in existing list
                 ## of uncerts
+                if self.ana_type=="Hplus" :
+                    uncert_appendix[label] = uncerts
+                    break
                 if not label in uncert_appendix :
                     uncert_appendix[label] = uncerts
                 else :
@@ -256,14 +273,14 @@ class ModelDatacard(DatacardAdaptor) :
         for (shape_file,reduced_model) in schedule.iteritems() :
             print 'creating template(s) :', dir+shape_file, '(morphing mode is', morph_per_file[shape_file]+')'
             if self.update_file :
-                template = ModelTemplate(dir+shape_file, self.model_label)
+                template = ModelTemplate(dir+shape_file, self.mA, self.ana_type, self.model_label)
                 template.create_templates(reduced_model, self.model_label, 1./float(model.tanb), morph_per_file[shape_file])
                 tmp = '/tmp/'+''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10))
                 os.system("hadd {TMP} {SOURCE} {SOURCE}{MODEL}".format(TMP=tmp, SOURCE=dir+shape_file, MODEL=self.model_label))
                 os.system("mv {TMP} {SOURCE}".format(TMP=tmp, SOURCE=dir+shape_file))
                 os.system("rm {SOURCE}{MODEL}".format(SOURCE=dir+shape_file,MODEL=self.model_label))
             else :
-                template = ModelTemplate(dir+shape_file)
+                template = ModelTemplate(dir+shape_file, self.mA, self.ana_type)
                 template.create_templates(reduced_model, self.model_label, 1./float(model.tanb), morph_per_file[shape_file])
         ## adapt datacards to pick up proper signal rates
         print 'adapting datacard(s) :', path
