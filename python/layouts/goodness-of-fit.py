@@ -26,5 +26,5 @@ layout = cms.PSet(
     ## define output label
     outputLabel = cms.string("goodness-of-fit"),
     ## define masspoints for limit plot
-    masspoints = cms.vdouble(125),
+    masspoints = cms.vdouble(300),
 )
