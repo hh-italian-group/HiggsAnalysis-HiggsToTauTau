@@ -45,7 +45,7 @@ layout = cms.PSet(
     ## SM like limit without the line at sigma=1
     mssm_nolog = cms.bool(True),
     ## plot expected only
-    expectedOnly = cms.bool(False),
+    expectedOnly = cms.bool(True),
     ## mass label for the injected signal print band in different layout for signal injected
     injectedMass=cms.string("125"),    
     ## print band in different layout for signal injected

@@ -229,7 +229,7 @@ channels = et mt tt
 
 et_categories_8TeV = 0 1 2
 mt_categories_8TeV = 0 1 2
-tt_categories_8TeV = 0 1 2
+tt_categories_8TeV = 0 1 2 
 
 
 et_names_8TeV = 2jet0tag 2jet1tag 2jet2tag
