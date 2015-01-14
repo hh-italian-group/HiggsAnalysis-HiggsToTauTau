@@ -33,12 +33,21 @@ parser.add_option("--new-merging-threshold", dest="new_merging_threshold", defau
                   help="Threshold for the new merging by Andrew. [Default: \"0.5\"]")
 parser.add_option("--drop-normalize-bbb", dest="drop_normalize_bbb", default=False, action="store_true",
                   help="Normalize yield to stay constand when adding bbb shape uncertainties. [Default: False]")
+parser.add_option("--profile", dest="profile", default=False, action="store_true",
+                  help="Add extra signals bbH and A->Zh for profiling. [Default: False]")
 parser.add_option("-c", "--config", dest="config", default="",
                   help="Additional configuration file to be used for the setup [Default: \"\"]")
+parser.add_option("--model",dest="model",default="",
+                  help="Setup directory structure for model-dependent limits in bins of a different variable than mass. Possible choices are lowmH and 2HDM [Default:\"\"]")
+parser.add_option("--range",dest="range",default="",
+                  help="Specify range of variable points when running for lowmH or 2HDM [Default:\"\"]")
 
 (options, args) = parser.parse_args()
 if len(args) < 1 :
-    args.append("260-350:10")
+    if options.model=="2HDM" :
+        args.append("0.0_1.0:0.1")
+    else : 
+        args.append("260_350:10")
 
 import os
 import glob 
@@ -109,7 +118,7 @@ if options.reload :
     ## remove existing cash
     if os.path.exists("{CMSSW_BASE}/src/.setup{LABEL}".format(CMSSW_BASE=cmssw_base, LABEL=options.label)):
         os.system("rm -r {CMSSW_BASE}/src/.setup{LABEL}".format(CMSSW_BASE=cmssw_base, LABEL=options.label))
-    os.system("cp -r {CMSSW_BASE}/src/HiggsAnalysis/HiggsToTauTau/setup-Hhh {CMSSW_BASE}/src/.setup{LABEL}".format(CMSSW_BASE=cmssw_base, LABEL=options.label))
+    os.system("cp -r {CMSSW_BASE}/src/HiggsAnalysis/HiggsToTauTau/setup-Hhh{PROFILE} {CMSSW_BASE}/src/.setup{LABEL}".format(PROFILE="-profile" if options.profile else "", CMSSW_BASE=cmssw_base, LABEL=options.label))
     for chn in config.channels :
         print "... copy files for channel:", chn
         ## remove legacy
@@ -153,29 +162,48 @@ if options.update_setup :
         for per in config.periods :
             if directories[chn][per] == 'None' :
                 continue
-            os.system("scale2accept.py -i {SETUP} -c '{CHN}' -p '{PER}' -a 'Hhh' 90 100-200:20 130 250-400:50".format(
+            if not options.profile :
+                continue
+            os.system("scale2accept.py -i {SETUP} -c '{CHN}' -p '{PER}' -a 'Hhh' 90 100_200:20 130 250_400:50".format(
                 SETUP=setup,
                 CHN=chn,
                 PER=per,
                 ))
-  ## apply horizontal template morphing for finer step sizes for limit calculation
-    ##em
-    if "em" in config.channels:
-        os.system("horizontal-morphing.py --categories='emu_1jet0tag,emu_1jet1tag,emu_2jet0tag,emu_2jet1tag,emu_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_e_8TeV' --masses='250,300' --step-size 10. -v {SETUP}/em/htt_em.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-        os.system("horizontal-morphing.py --categories='emu_1jet0tag,emu_1jet1tag,emu_2jet0tag,emu_2jet1tag,emu_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_e_8TeV' --masses='300,350' --step-size 10. -v {SETUP}/em/htt_em.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-    ##et
-    if "et" in config.channels:
-        os.system("horizontal-morphing.py --categories='eleTau_2jet0tag,eleTau_2jet1tag,eleTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_etau_8TeV' --masses='250,300' --step-size 10. -v {SETUP}/et/htt_et.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-        os.system("horizontal-morphing.py --categories='eleTau_2jet0tag,eleTau_2jet1tag,eleTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_etau_8TeV' --masses='300,350' --step-size 10. -v {SETUP}/et/htt_et.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-    ##mt
-    if "mt" in config.channels:
-        os.system("horizontal-morphing.py --categories='muTau_2jet0tag,muTau_2jet1tag,muTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_mutau_8TeV' --masses='250,300' --step-size 10. -v {SETUP}/mt/htt_mt.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-        os.system("horizontal-morphing.py --categories='muTau_2jet0tag,muTau_2jet1tag,muTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_mutau_8TeV' --masses='300,350' --step-size 10. -v {SETUP}/mt/htt_mt.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-    ##tt
-    if "tt" in config.channels:
-        ##os.system("horizontal-morphing.py --categories='tauTau_1jet0tag,tauTau_1jet1tag,tauTau_2jet0tag,tauTau_2jet1tag,tauTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_tautau_8TeV' --masses='250,300' --step-size 10. -v {SETUP}/tt/htt_tt.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-        ##os.system("horizontal-morphing.py --categories='tauTau_1jet0tag,tauTau_1jet1tag,tauTau_2jet0tag,tauTau_2jet1tag,tauTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_tautau_8TeV' --masses='300,350' --step-size 10. -v {SETUP}/tt/htt_tt.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
-        os.system("horizontal-morphing.py --categories='tauTau_2jet0tag,tauTau_2jet1tag,tauTau_2jet2tag' --samples='bbH{MASS}' --uncerts='CMS_scale_t_tautau_8TeV' --masses='250,350' --step-size 10. -v {SETUP}/tt/htt_tt.inputs-Hhh-8TeV.root".format(SETUP=setup, MASS="{MASS}"))
+
+            ## apply horizontal template morphing for finer step sizes for limit calculation
+            if per != "8TeV":
+                continue
+
+            unc = {"em": "CMS_scale_e_8TeV",
+                   "et": "CMS_scale_t_etau_8TeV, CMS_scale_j_8TeV",
+                   "mt": "CMS_scale_t_mutau_8TeV, CMS_scale_j_8TeV",
+                   "tt": "CMS_scale_t_tautau_8TeV",
+                   }[chn]
+
+            massStrings = {"em": ["'250,300'", "'300,350'"],
+                           "et": ["'250,300'", "'300,350'"],
+                           "mt": ["'250,300'", "'300,350'"],
+                           "tt": ["'250,350'"],
+                           }[chn]
+
+            categoryPrefix = {"em": "emu",
+                              "et": "eleTau",
+                              "mt": "muTau",
+                              "tt": "tauTau",
+                              }[chn]
+            categoryList = ','.join(["%s_%s" % (categoryPrefix, cat) for cat in config.categoryname[chn][per]])
+
+            args = ["--categories='%s'" % categoryList,
+                    "--samples='bbH{MASS}'".format(MASS="{MASS}"),
+                    "--step-size 10. -v",
+                    "--uncerts='%s'" % unc,
+                    " {SETUP}/{CHN}/htt_{CHN}.inputs-Hhh-8TeV.root".format(SETUP=setup, CHN=chn),
+                    ]
+            for massString in massStrings:
+                cmd = " ".join(["horizontal-morphing.py", "--masses=%s" % massString] + args)
+                #print cmd
+                os.system(cmd)
+
 
     ## setup directory structure
     dir = "{CMSSW_BASE}/src/setups{LABEL}".format(CMSSW_BASE=cmssw_base, LABEL=options.label)
@@ -200,13 +228,14 @@ if options.update_setup :
                         if options.new_merging :
                             filename='htt_'+chn+'.inputs-Hhh-'+per+'.root'
                             for cat in config.bbbcat[chn][per][idx].split(',') :
+                                print cat
                                 ## loop all categories in question for index idx
-                                if len(config.bbbproc[chn][idx].replace('>',',').split(','))>1 :
+                                if len(config.bbbproc[chn][idx].replace('>','+').split('+'))>1 :
                                     ## only get into action if there is more than one sample to do the merging for
                                     os.system("merge_bin_errors.py --folder {DIR} --processes {PROC} --bbb_threshold={BBBTHR} --merge_threshold={THRESH} --verbose {SOURCE} {TARGET}".format(
                                         ## this list has only one entry by construction
-                                        DIR=get_channel_dirs(chn, cat,per)[0],
-                                        PROC=config.bbbproc[chn][idx].replace('>',','),
+                                        DIR=get_channel_dirs("Hhh",chn, cat,per)[0],
+                                        PROC=config.bbbproc[chn][idx].split(',')[0].replace('>',','),
                                         BBBTHR=config.bbbthreshold[chn],
                                         THRESH=options.new_merging_threshold,
                                         SOURCE=dir+'/'+ana+'/'+chn+'/'+filename,
@@ -222,7 +251,7 @@ if options.update_setup :
                             PER=per,
                             NORMALIZE=normalize_bbb,
                             CAT=config.bbbcat[chn][per][idx],
-                            PROC=config.bbbproc[chn][idx].replace('>',',') if options.new_merging else config.bbbproc[chn][idx],
+                            PROC=config.bbbproc[chn][idx].replace('>',','),
                             THR=config.bbbthreshold[chn]
                             ))                   
                         os.system("rm -rf {DIR}/{ANA}".format(DIR=dir, ANA=ana))
@@ -242,7 +271,7 @@ if options.update_aux :
         for chn in config.channels:
             for per in config.periods: 
                 if config.categories[chn][per]:
-                    os.system("setup-datacards.py -i {CMSSW_BASE}/src/setups{LABEL}/{ANA} -o {DIR}/{ANA} -p '{PER}' -a Hhh -c '{CHN}' --Hhh-categories-{CHN}='{CATS}' {MASSES}".format(
+                    os.system("setup-datacards.py -i {CMSSW_BASE}/src/setups{LABEL}/{ANA} -o {DIR}/{ANA} -p '{PER}' -a Hhh -c '{CHN}' --Hhh-categories-{CHN}='{CATS}' {TWOHDM} {MASSES}".format(
                     CMSSW_BASE=cmssw_base,
                     LABEL=options.label,
                     ANA=ana,
@@ -250,6 +279,7 @@ if options.update_aux :
                     PER=per,
                     CHN=chn,
                     CATS=' '.join(config.categories[chn][per]),
+                    TWOHDM='--twohdm' if options.model=="2HDM" else ' ',
                     MASSES=' '.join(masses),
                     ))
         if 'bbb' in ana :
@@ -285,12 +315,26 @@ if options.update_limits :
         for chn in config.channels:
             for per in config.periods:
                 if config.categories[chn][per]:
-                    os.system("setup-Hhh.py -i aux{INDEX}/{ANA}{ASIMOV} -o {DIR}/{ANA}{ASIMOV} -p '{PER}' -a Hhh -c '{CHN}' {MASSES}".format(
-                        INDEX=options.label,                
-                        ANA=ana,
-                        ASIMOV='-asimov' if options.blind_datacards else '',
-                        DIR=dir,
-                        PER=per,
-                        CHN=chn,
-                        MASSES=' '.join(masses),
-                        ))
+                    if options.model=="" :
+                         os.system("setup-Hhh.py -i aux{INDEX}/{ANA}{ASIMOV} -o {DIR}/{ANA}{ASIMOV} -p '{PER}' -a Hhh  -c '{CHN}' {CATS} {MASSES}".format(
+                            INDEX=options.label,                
+                            ANA=ana,
+                            ASIMOV='-asimov' if options.blind_datacards else '',
+                            DIR=dir,
+                            PER=per,
+                            CHN=chn,
+                            CATS="--Hhh-categories-%s='%s'" % (chn, " ".join(config.categories[chn][per])),
+                            MASSES=' '.join(masses),
+                            ))
+                    else :
+                         os.system("setup-Hhh.py -i aux{INDEX}/{ANA}{ASIMOV} -o {DIR}/{ANA}{ASIMOV} -p '{PER}' -a Hhh  -c '{CHN}' {CATS} --model {MODEL} {MASSES}".format(
+                            INDEX=options.label,                
+                            ANA=ana,
+                            ASIMOV='-asimov' if options.blind_datacards else '',
+                            DIR=dir,
+                            PER=per,
+                            CHN=chn,
+                            CATS="--Hhh-categories-%s='%s'" % (chn, " ".join(config.categories[chn][per])),
+                            MODEL=options.model,
+                            MASSES=' '.join(masses)
+                            ))

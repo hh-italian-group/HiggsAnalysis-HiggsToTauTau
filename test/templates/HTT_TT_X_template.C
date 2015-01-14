@@ -182,19 +182,19 @@ HTT_TT_X(bool scaled=true, bool log=true, float min=0.1, float max=-1., TString 
   if(std::string(directory) == std::string("tauTau_btag"                 )){ category_extra = "b-tag";                }
   if(std::string(directory) == std::string("tauTau_nobtag_low"           )){ category = "#tau_{h}#tau_{h}";           }
   if(std::string(directory) == std::string("tauTau_nobtag_low"           )){ category_extra = "no b-tag"; }
-  if(std::string(directory) == std::string("tauTau_nobtag_low"           )){ category_extra2 = "low p_{T}^{#tau_{h}}"; }
+  if(std::string(directory) == std::string("tauTau_nobtag_low"           )){ category_extra2 = "low"; }
   if(std::string(directory) == std::string("tauTau_nobtag_medium"        )){ category = "#tau_{h}#tau_{h}";           }
   if(std::string(directory) == std::string("tauTau_nobtag_medium"        )){ category_extra = "no b-tag"; }
-  if(std::string(directory) == std::string("tauTau_nobtag_medium"        )){ category_extra2 = "medium p_{T}^{#tau_{h}}"; }
+  if(std::string(directory) == std::string("tauTau_nobtag_medium"        )){ category_extra2 = "medium"; }
   if(std::string(directory) == std::string("tauTau_nobtag_high"          )){ category = "#tau_{h}#tau_{h}";           }
   if(std::string(directory) == std::string("tauTau_nobtag_high"          )){ category_extra = "no b-tag"; }
-  if(std::string(directory) == std::string("tauTau_nobtag_high"          )){ category_extra2 = "high p_{T}^{#tau_{h}}"; }
+  if(std::string(directory) == std::string("tauTau_nobtag_high"          )){ category_extra2 = "high"; }
   if(std::string(directory) == std::string("tauTau_btag_low"             )){ category = "#tau_{h}#tau_{h}";           }
   if(std::string(directory) == std::string("tauTau_btag_low"             )){ category_extra = "b-tag"; }
-  if(std::string(directory) == std::string("tauTau_btag_low"             )){ category_extra2 = "low p_{T}^{#tau_{h}}"; }
+  if(std::string(directory) == std::string("tauTau_btag_low"             )){ category_extra2 = "low"; }
   if(std::string(directory) == std::string("tauTau_btag_high"            )){ category = "#tau_{h}#tau_{h}";           }
   if(std::string(directory) == std::string("tauTau_btag_high"            )){ category_extra = "b-tag"; }
-  if(std::string(directory) == std::string("tauTau_btag_high"            )){ category_extra2 = "high p_{T}^{#tau_{h}}"; }
+  if(std::string(directory) == std::string("tauTau_btag_high"            )){ category_extra2 = "high"; }
 
   const char* dataset;
 #ifdef MSSM
@@ -226,13 +226,13 @@ HTT_TT_X(bool scaled=true, bool log=true, float min=0.1, float max=-1., TString 
 #ifdef MSSM
   TH1F* ggH    = refill((TH1F*)input2->Get(TString::Format("%s/ggH$MA" , directory)), "ggH"); InitSignal(ggH); ggH->Scale($TANB);
   TH1F* bbH    = refill((TH1F*)input2->Get(TString::Format("%s/bbH$MA" , directory)), "bbH"); InitSignal(bbH); bbH->Scale($TANB);
+  TH1F* ggH_SM125= refill((TH1F*)input->Get(TString::Format("%s/ggH_SM125"  , directory)), "ggH_SM125"); InitHist(ggH_SM125, "", "", kGreen+2, 1001);
+  TH1F* qqH_SM125= refill((TH1F*)input->Get(TString::Format("%s/qqH_SM125"  , directory)), "qqH_SM125"); InitHist(qqH_SM125, "", "", kGreen+2, 1001);
+  TH1F* VH_SM125 = refill((TH1F*)input->Get(TString::Format("%s/VH_SM125"   , directory)), "VH_SM125" ); InitHist(VH_SM125, "", "", kGreen+2, 1001);
 #else
   TH1F* ggH    = refill((TH1F*)input->Get(TString::Format("%s/ggH125"  , directory)), "ggH"); InitSignal(ggH); ggH->Scale(SIGNAL_SCALE);
   TH1F* qqH    = refill((TH1F*)input->Get(TString::Format("%s/qqH125"  , directory)), "qqH"); InitSignal(qqH); qqH->Scale(SIGNAL_SCALE);
   TH1F* VH     = refill((TH1F*)input->Get(TString::Format("%s/VH125"   , directory)), "VH" ); InitSignal(VH ); VH ->Scale(SIGNAL_SCALE);
-  TH1F* ggH_SM125= refill((TH1F*)input->Get(TString::Format("%s/ggH_SM125"  , directory)), "ggH_SM125"); InitHist(ggH_SM125, "", "", kGreen+2, 1001);
-  TH1F* qqH_SM125= refill((TH1F*)input->Get(TString::Format("%s/qqH_SM125"  , directory)), "qqH_SM125"); InitHist(qqH_SM125, "", "", kGreen+2, 1001);
-  TH1F* VH_SM125 = refill((TH1F*)input->Get(TString::Format("%s/VH_SM125"   , directory)), "VH_SM125" ); InitHist(VH_SM125, "", "", kGreen+2, 1001);
 #endif
 #ifdef ASIMOV
   TH1F* data   = refill((TH1F*)input->Get(TString::Format("%s/data_obs_asimov", directory)), "data", true);

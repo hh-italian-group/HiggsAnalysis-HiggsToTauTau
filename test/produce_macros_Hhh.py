@@ -276,7 +276,7 @@ class Analysis:
 config=configuration(options.analysis, options.config, options.add_mutau_soft)
 fitresults = options.fitresults.format(ANALYSIS=options.analysis)
 for chn in config.channels :
-    if chn == 'vhtt' or chn == 'mt' or chn == 'et' or chn == 'em':
+    if chn == 'vhtt':
         continue
     for per in config.periods :
         for cat in config.categories[chn][per] :
