@@ -122,7 +122,7 @@ directories_Hhh = {
     '0'  : ['2jet0tag', '2jet0tag-tt'],
     '1'  : ['2jet1tag'  , '2jet1tag-tt'  ],
     '2'  : ['2jet2tag'  , '2jet2tag-tt'  ],
-    '3'  : ['1jet0tag'  , '1jet0tag-tt'  ],
+    '3'  : ['inclusive'  , 'inclusive-tt'  ],
     '4'  : ['1jet1tag'  , '1jet1tag-tt'  ],
     },
 }

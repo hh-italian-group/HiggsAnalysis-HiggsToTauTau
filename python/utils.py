@@ -314,7 +314,7 @@ def get_channel_dirs(analysis, finalstate, category, period):
  	'00' : ['2jet0tag' ],
         '01' : ['2jet1tag' ],
         '02' : ['2jet2tag' ],
-        '03' : ['1jet0tag' ],
+        '03' : ['inclusive' ],
         '04' : ['1jet1tag' ],
         },
         }, 
